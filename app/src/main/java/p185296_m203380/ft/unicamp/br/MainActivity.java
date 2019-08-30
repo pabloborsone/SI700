@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.preference.PreferenceManager;
 import android.view.View;
 
 import androidx.core.view.GravityCompat;
@@ -22,14 +23,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    SharedPreferences prefs = null;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -40,25 +40,32 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.nav_view)
     NavigationView navigationView;
 
+    @BindView(R.id.main_text)
+    TextView welcomeText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
-        init();
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean firstOpened = preferences.getBoolean("first_run", true);
+
+        checkFirstTimeAccess(firstOpened, preferences);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (prefs.getBoolean("firstrun", true)) {
-            Intent intent = new Intent(this, FirstAccessActivity.class);
-            this.startActivity(intent);
-            prefs.edit().putBoolean("firstrun", false).apply();
+    private void checkFirstTimeAccess(boolean firstOpened, SharedPreferences preferences) {
+        if (firstOpened) {
+            this.startActivity(new Intent(this, FirstAccessActivity.class));
             this.finish();
+
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("first_run", false);
+            editor.apply();
+        } else {
+            init();
         }
     }
 
@@ -68,7 +75,10 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-        prefs = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+
+        String userName = getIntent().getStringExtra("name");
+        String text = String.format(getResources().getString(R.string.main_activity_text), userName);
+        welcomeText.setText(text);
     }
 
     @Override

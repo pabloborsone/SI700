@@ -15,4 +15,8 @@
     <string name="menu_send">Send</string>
 
     <string name="welcome_title">Olá, que tal nos dizer seu nome?</string>
+    <string name="welcome_edit_text_hint">Ex: Pablo</string>
+    <string name="first_access_button">enviar</string>
+
+    <string name="main_activity_text">Olá, %s!</string>
 </resources>
